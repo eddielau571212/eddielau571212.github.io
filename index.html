@@ -113,6 +113,8 @@
     </style>
   </head>
   <body>
+    <p id="ONTAT"></p>
+    <p id="LAMTIN"></p>
     <div class="calendar">
       <button id="pre"><</button>
       <p id="table"></p>
@@ -396,6 +398,101 @@
 
       calendar.renderTable();
       calendar.submitTask();
+
+      const LAMTIN = document.getElementById("LAMTIN");
+      const ONTAT = document.getElementById("ONTAT");
+
+      async function kmbAllRoute() {
+        try {
+          const response = await fetch(
+            "https://data.etabus.gov.hk/v1/transport/kmb/route/"
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            //   console.log(jsonData);
+          } else {
+            console.log("Error: " + response.status);
+          }
+        } catch (error) {
+          console.log("Error: " + error);
+        }
+      }
+
+      kmbAllRoute();
+
+      async function kmbRoute() {
+        try {
+          const response = await fetch(
+            "https://data.etabus.gov.hk/v1/transport/kmb/route-stop/213M/outbound/1"
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            //   console.log(jsonData);
+          } else {
+            console.log("Error: " + response.status);
+          }
+        } catch (error) {
+          console.log("Error: " + error);
+        }
+      }
+
+      kmbRoute();
+
+      async function kmbRouteTimeLT() {
+        try {
+          const response = await fetch(
+            "https://data.etabus.gov.hk/v1/transport/kmb/eta/061BF67CD917035D/213M/1"
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            const result = JSON.stringify(jsonData);
+            //   console.log(result);
+            //   console.log(jsonData.data);
+
+            jsonData.data.map((data) => {
+              const arriveTime = data.eta.slice(11, 19);
+              // console.log(data);
+
+              console.log(`LOCATION LT arrive time is ${arriveTime}`);
+              LAMTIN.innerHTML += `LOCATION LT arrive time is ${arriveTime}<br>`;
+            });
+          } else {
+            console.log("Error: " + response.status);
+          }
+        } catch (error) {
+          console.log("Error: " + error);
+        }
+      }
+
+      kmbRouteTimeLT();
+
+      async function kmbRouteTimeOT() {
+        try {
+          const response = await fetch(
+            "https://data.etabus.gov.hk/v1/transport/kmb/eta/8CA39D263F36C070/213M/1"
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            const result = JSON.stringify(jsonData);
+            //   console.log(result);
+            console.log(jsonData.data);
+
+            jsonData.data.map((data) => {
+              const arriveTime = data.eta.slice(11, 19);
+              // console.log(data);
+
+              console.log(`LOCATION OT arrive time is ${arriveTime}`);
+              ONTAT.innerHTML += `LOCATION OT arrive time is ${arriveTime}<br>`;
+            });
+          } else {
+            console.log("Error: " + response.status);
+          }
+        } catch (error) {
+          console.log("Error: " + error);
+        }
+      }
+
+      kmbRouteTimeOT();
     </script>
   </body>
 </html>
