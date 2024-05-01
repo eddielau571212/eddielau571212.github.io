@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDoCalendar</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      #table {
+        width: 200px;
+        border: 1px solid #ccc;
+        padding: 3px;
+      }
+      .tasklist {
+        display: flex;
+        flex-direction: column;
+        /* justify-content: center; */
+        align-items: center;
+        width: 200px;
+      }
+
+      /* Modal Content */
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin-top: 28%;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 33%;
+        height: 20%;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      #input {
+        border-radius: 20px;
+        width: 40%;
+      }
+      #input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2%;
+      }
+      #task {
+        word-break: break-all;
+      }
+      .selected:hover {
+        background-color: lightgray;
+        border-radius: 100%;
+        translate: 0.3s;
+      }
+      #result {
+        border: 1px dotted #ccc;
+        padding: 3px;
+      }
+
+      #result ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #result ul li {
+        padding: 5px 0;
+      }
+
+      #result ul li:hover {
+        background: #eee;
+      }
+      .calendar {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calendar">
+      <button id="pre"><</button>
+      <p id="table"></p>
+
+      <button id="next">></button>
+    </div>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="input-area">
+          <input type="text" id="input" />
+          <button id="add">Add</button>
+        </div>
+        <div class="tasklist"></div>
+      </div>
+    </div>
+    <div>
+      <input type="text" name="q" id="search" />
+      <div id="result"></div>
+    </div>
+
+    <script>
+      class ToDoCalendar {
+        constructor() {
+          this.months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          this.weekDay = [
+            " Sun ",
+            " Mon ",
+            " Tue ",
+            " Wed ",
+            " Thu ",
+            " Fri ",
+            " Sat ",
+          ];
+          this.getUpdateMonth = 1;
+          this.d = new Date();
+          this.currentMonthIndex = this.d.getMonth();
+          this.currentMonth = this.months[this.currentMonthIndex];
+          this.day = this.d.getDay();
+          this.month = this.months[this.d.getMonth()];
+          this.tableEl = document.getElementById("table");
+          this.preBtn = document.getElementById("pre");
+          this.nextBtn = document.getElementById("next");
+          this.inputEl = document.getElementById("search");
+          this.year = this.d.getFullYear();
+          this.preBtn.addEventListener("click", () => {
+            this.goToPreviousMonth();
+          });
+          this.nextBtn.addEventListener("click", () => {
+            this.goToNextMonth();
+          });
+          this.inputEl.addEventListener("input", (e) => {
+            this.showResults(e.target.value);
+          });
+        }
+
+        renderTable() {
+          console.log();
+
+          let table = "<table>";
+          table += "<tr>";
+          table += "<th colspan='7'>" + this.year + "</th>";
+          table += "<tr>";
+          //currentMonthIndex 	Get month as a number (0-11)
+          table += "<th colspan='7'>" + this.months[this.currentMonthIndex];
+          +"</th>";
+          table += "</tr>";
+          table += "<tr>";
+          for (let i = 0; i < this.weekDay.length; i++) {
+            table += "<td>" + this.weekDay[i] + "</td>";
+          }
+          table += "</tr>";
+          let count = 1;
+          for (let i = 0; i < 6; i++) {
+            table += "<tr>";
+            for (let j = 0; j < 7; j++) {
+              if (
+                count >
+                new Date(
+                  this.d.getFullYear(),
+                  this.d.getMonth() + this.getUpdateMonth,
+                  0
+                ).getDate()
+                //	Get day as a number (1-31)
+              ) {
+                break;
+              }
+              if (
+                i === 0 &&
+                j <
+                  new Date(
+                    this.d.getFullYear(),
+                    this.currentMonthIndex,
+                    1
+                  ).getDay()
+              ) {
+                table += "<td></td>";
+              } else {
+                table += "<td class='day'>" + count + "</td>";
+
+                count++;
+              }
+            }
+            table += "</tr>";
+          }
+          table += "</table>";
+
+          this.tableEl.innerHTML = table;
+          this.selectDate();
+          return;
+        }
+        goToPreviousMonth() {
+          this.currentMonthIndex--;
+          if (this.currentMonthIndex < 0) {
+            this.currentMonthIndex = 11;
+            this.year--;
+            this.d.setFullYear(this.d.getFullYear() - 1);
+          }
+          this.getUpdateMonth--;
+
+          this.renderTable();
+        }
+
+        goToNextMonth() {
+          this.currentMonthIndex++;
+          if (this.currentMonthIndex > 11) {
+            this.currentMonthIndex = 0;
+            this.year++;
+            this.d.setFullYear(this.d.getFullYear() + 1);
+          }
+          this.getUpdateMonth++;
+          this.renderTable();
+        }
+
+        selectDate() {
+          this.dayEl = document.querySelectorAll(".day");
+          this.dayEl.forEach((el) => {
+            console.log(el);
+            this.moveToSelect(el);
+          });
+        }
+
+        moveToSelect(el) {
+          el.addEventListener("mousemove", () => {
+            el.classList.add("selected");
+            this.addTask(
+              `${this.year}${this.months[this.currentMonthIndex]}${
+                el.textContent
+              }`
+            );
+            this.openModal();
+          });
+        }
+
+        addTask(date) {
+          this.storedEvents = [];
+          this.date = date;
+          this.input = document.getElementById("input");
+          if (this.input === null || this.input === "") {
+            return;
+          } else {
+            this.storedEvents =
+              JSON.parse(localStorage.getItem(this.date)) || [];
+          }
+        }
+
+        completeTask() {
+          if (this.input.value === "") {
+            alert("Please enter a task");
+            return;
+          }
+          this.storedEvents.push(this.input.value);
+          localStorage.setItem(this.date, JSON.stringify(this.storedEvents));
+          this.input.value = "";
+        }
+
+        getTask() {
+          this.tasklist = document.querySelector(".tasklist");
+          const taskList = localStorage.getItem(this.date);
+
+          if (taskList) {
+            let taskItems = "";
+
+            if (typeof taskList === "string") {
+              taskItems = taskList
+                .replace("[", "")
+                .replace("]", "")
+                .replace(/"/g, "")
+                .replace(/,/g, "<br>");
+            } else if (typeof taskList === "object") {
+              const tasks = JSON.parse(taskList);
+
+              tasks.forEach((task) => {
+                taskItems += `<div>${task}</div>`;
+              });
+            }
+            this.tasklist.innerHTML = `<div id="task"> ${this.date} <br>${taskItems}</div>`;
+          } else {
+            this.tasklist.innerHTML = "";
+          }
+        }
+
+        submitTask() {
+          const add = document.getElementById("add");
+          add.addEventListener("click", () => {
+            this.completeTask();
+            this.getTask();
+          });
+        }
+        openModal() {
+          this.getTask();
+          const modal = document.getElementById("myModal");
+          const span = document.getElementsByClassName("close")[0];
+
+          this.dayEl.forEach((el) => {
+            el.addEventListener("dblclick", () => {
+              modal.style.display = "block";
+            });
+          });
+
+          span.onclick = function () {
+            modal.style.display = "none";
+          };
+
+          window.onclick = function (event) {
+            if (event.target == modal) {
+              modal.style.display = "none";
+            }
+          };
+        }
+        autocompleteMatch(input) {
+          let searchArray = [];
+          const items = { ...localStorage };
+          const searchObjAll = Object.entries(items);
+          const searchObjValue = Object.values(items);
+          const searchObjKey = Object.keys(items);
+          if (input == "") {
+            return [];
+          }
+          let reg = new RegExp(input);
+          return searchObjAll.filter(function ([key, value]) {
+            //[key, value] is a destructuring assignment
+            if (key.match(reg) || value.match(reg)) {
+              //if the key or value match the input
+              return key;
+            }
+          });
+        }
+        showResults(val) {
+          this.res = document.getElementById("result");
+          this.res.innerHTML = "";
+          let lists = "";
+          let terms = this.autocompleteMatch(val);
+          for (let i = 0; i < terms.length; i++) {
+            lists += "<li>" + terms[i] + "</li>";
+          }
+          this.res.innerHTML =
+            "<ul>" +
+            lists
+              .replace(/\[/g, "")
+              .replace(/\]/g, "")
+              .replace(/"/g, "")
+              .replace(/,/g, "<br>") +
+            "</ul>";
+        }
+      }
+      let calendar = new ToDoCalendar();
+
+      calendar.renderTable();
+      calendar.submitTask();
+
+      const LAMTIN = document.getElementById("LAMTIN");
+      const ONTAT = document.getElementById("ONTAT");
+
+      async function kmbRoute() {
+        try {
+          const response = await fetch(
+            "https://data.etabus.gov.hk/v1/transport/kmb/route-stop/213M/outbound/1"
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            //   console.log(jsonData);
+          } else {
+            console.log("Error: " + response.status);
+          }
+        } catch (error) {
+          console.log("Error: " + error);
+        }
+      }
+    </script>
+  </body>
+</html>
