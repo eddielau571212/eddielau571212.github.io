@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ToDoCalendar</title>
     <style>
+      .day {
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        align-items: start;
+        top: 0px;
+        font-size: 10px;
+      }
+
+      #event {
+        position: absolute;
+        transform: translateX(-120%);
+        border: 1px solid #ccc;
+        font-size: 10px;
+      }
       body {
         display: flex;
         flex-direction: column;
@@ -86,6 +101,7 @@
         border-radius: 100%;
         translate: 0.3s;
       }
+
       #result {
         border: 1px dotted #ccc;
         padding: 3px;
@@ -109,6 +125,9 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
+      }
+      .date-in-month {
+        display: none;
       }
     </style>
   </head>
@@ -135,6 +154,9 @@
     </div>
 
     <script>
+      //use external js file
+      //use extend to add new method to the class
+
       class ToDoCalendar {
         constructor() {
           this.months = [
@@ -183,8 +205,9 @@
         }
 
         renderTable() {
-          console.log();
-
+          const items = { ...localStorage };
+          const searchObjAll = Object.entries(items);
+          console.log(searchObjAll);
           let table = "<table>";
           table += "<tr>";
           table += "<th colspan='7'>" + this.year + "</th>";
@@ -224,7 +247,52 @@
               ) {
                 table += "<td></td>";
               } else {
-                table += "<td class='day'>" + count + "</td>";
+                if (
+                  localStorage.getItem(
+                    `${this.year}${this.months[this.currentMonthIndex]}${count}`
+                  )
+                ) {
+                  console.log(
+                    localStorage.getItem(
+                      `${this.year}${
+                        this.months[this.currentMonthIndex]
+                      }${count}`
+                    )
+                  );
+                }
+
+                const date = `${this.year}${
+                  this.months[this.currentMonthIndex]
+                }${count}`;
+
+                // if(date ==)
+                const arr = [];
+                const eventArr = [];
+                const event = localStorage.getItem(date);
+                eventArr.push(event);
+
+                console.log(event);
+
+                table += `<div class="date-in-month">${this.year}${
+                  this.months[this.currentMonthIndex]
+                }<td class='day'>${count}</td></div>`;
+
+                //avoid duplicate
+                for (let i = 0; i < searchObjAll.length; i++) {
+                  if (searchObjAll[i][0] === date) {
+                    arr.push(searchObjAll[i][1]);
+                    console.log(arr);
+                    table += `<td  id="event">${arr.map((event) =>
+                      event
+                        .replace(/\[/g, "")
+                        .replace(/\]/g, "")
+                        .replace(/"/g, "")
+                        .replace(/,/g, "<br>")
+                    )}</td></div>`;
+                  }
+                }
+
+                console.log(arr);
 
                 count++;
               }
@@ -234,7 +302,7 @@
           table += "</table>";
 
           this.tableEl.innerHTML = table;
-          this.selectDate();
+          // this.selectDate();
           return;
         }
         goToPreviousMonth() {
@@ -247,6 +315,7 @@
           this.getUpdateMonth--;
 
           this.renderTable();
+          this.selectDate();
         }
 
         goToNextMonth() {
@@ -258,12 +327,12 @@
           }
           this.getUpdateMonth++;
           this.renderTable();
+          this.selectDate();
         }
 
         selectDate() {
           this.dayEl = document.querySelectorAll(".day");
           this.dayEl.forEach((el) => {
-            console.log(el);
             this.moveToSelect(el);
           });
         }
@@ -282,13 +351,13 @@
 
         addTask(date) {
           this.storedEvents = [];
-          this.date = date;
+          this.date = date; //設置this.date的值為傳入的日期
           this.input = document.getElementById("input");
           if (this.input === null || this.input === "") {
             return;
           } else {
             this.storedEvents =
-              JSON.parse(localStorage.getItem(this.date)) || [];
+              JSON.parse(localStorage.getItem(this.date)) || []; //fetch the stored events from local storage
           }
         }
 
@@ -333,6 +402,8 @@
           add.addEventListener("click", () => {
             this.completeTask();
             this.getTask();
+            this.renderTable();
+            this.selectDate();
           });
         }
         openModal() {
@@ -374,6 +445,7 @@
             }
           });
         }
+
         showResults(val) {
           this.res = document.getElementById("result");
           this.res.innerHTML = "";
@@ -396,25 +468,7 @@
 
       calendar.renderTable();
       calendar.submitTask();
-
-      const LAMTIN = document.getElementById("LAMTIN");
-      const ONTAT = document.getElementById("ONTAT");
-
-      async function kmbRoute() {
-        try {
-          const response = await fetch(
-            "https://data.etabus.gov.hk/v1/transport/kmb/route-stop/213M/outbound/1"
-          );
-          if (response.ok) {
-            const jsonData = await response.json();
-            //   console.log(jsonData);
-          } else {
-            console.log("Error: " + response.status);
-          }
-        } catch (error) {
-          console.log("Error: " + error);
-        }
-      }
+      calendar.selectDate();
     </script>
   </body>
 </html>
