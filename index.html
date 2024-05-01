@@ -6,6 +6,7 @@
     <title>ToDoCalendar</title>
     <style>
       .day {
+        /* padding: 30px; */
         width: 30px;
         height: 30px;
         text-align: center;
@@ -129,6 +130,10 @@
       .date-in-month {
         display: none;
       }
+      td {
+        padding: 0px;
+        margin: 0px;
+      }
     </style>
   </head>
   <body>
@@ -156,7 +161,7 @@
     <script>
       //use external js file
       //use extend to add new method to the class
-
+      console.log(window);
       class ToDoCalendar {
         constructor() {
           this.months = [
@@ -207,7 +212,7 @@
         renderTable() {
           const items = { ...localStorage };
           const searchObjAll = Object.entries(items);
-          console.log(searchObjAll);
+          // console.log(searchObjAll);
           let table = "<table>";
           table += "<tr>";
           table += "<th colspan='7'>" + this.year + "</th>";
@@ -252,13 +257,13 @@
                     `${this.year}${this.months[this.currentMonthIndex]}${count}`
                   )
                 ) {
-                  console.log(
-                    localStorage.getItem(
-                      `${this.year}${
-                        this.months[this.currentMonthIndex]
-                      }${count}`
-                    )
-                  );
+                  // console.log(
+                  //   localStorage.getItem(
+                  //     `${this.year}${
+                  //       this.months[this.currentMonthIndex]
+                  //     }${count}`
+                  //   )
+                  // );
                 }
 
                 const date = `${this.year}${
@@ -271,7 +276,7 @@
                 const event = localStorage.getItem(date);
                 eventArr.push(event);
 
-                console.log(event);
+                // console.log(event);
 
                 table += `<div class="date-in-month">${this.year}${
                   this.months[this.currentMonthIndex]
@@ -281,7 +286,7 @@
                 for (let i = 0; i < searchObjAll.length; i++) {
                   if (searchObjAll[i][0] === date) {
                     arr.push(searchObjAll[i][1]);
-                    console.log(arr);
+                    // console.log(arr);
                     table += `<td  id="event">${arr.map((event) =>
                       event
                         .replace(/\[/g, "")
@@ -292,7 +297,7 @@
                   }
                 }
 
-                console.log(arr);
+                // console.log(arr);
 
                 count++;
               }
